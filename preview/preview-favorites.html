@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes App - Favorites</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f5f5f5; --card: #ffffff; --text-primary: #1a1a1a;
+      --text-secondary: #6b6b6b; --text-muted: #999999; --border: #e5e5e5;
+      --dark-bg: #1a1a1a; --dark-text: #ffffff; --dark-text-secondary: #a0a0a0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-hover: 0 8px 24px rgba(0,0,0,0.12);
+      --radius: 16px; --radius-sm: 12px; --radius-xs: 8px;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; }
+    .sidebar { width: 220px; min-height: 100vh; background: var(--card); border-right: 1px solid var(--border); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 10; }
+    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 32px; height: 32px; background: var(--text-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 18px; height: 18px; }
+    .nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-xs); font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+    .nav-item.active { background: var(--text-primary); color: #fff; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .nav-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding: 0 14px; margin-bottom: 8px; }
+    .tag-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sidebar-bottom { margin-top: auto; }
+    .new-note-btn { width: 100%; padding: 12px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; margin-bottom: 20px; }
+    .new-note-btn:hover { opacity: 0.85; }
+    .new-note-btn svg { width: 18px; height: 18px; }
+    .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-xs); cursor: pointer; transition: background 0.2s; }
+    .user-profile:hover { background: var(--bg); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dark-bg); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--text-muted); }
+    .main { flex: 1; margin-left: 220px; padding: 32px 40px; max-width: 1100px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .search-box { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; width: 320px; transition: border-color 0.2s; }
+    .search-box:focus-within { border-color: var(--text-primary); }
+    .search-box svg { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
+    .search-box input { border: none; outline: none; font-size: 14px; font-family: inherit; color: var(--text-primary); width: 100%; background: transparent; }
+    .search-box input::placeholder { color: var(--text-muted); }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 40px; height: 40px; border-radius: var(--radius-xs); border: 1px solid var(--border); background: var(--card); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); }
+    .icon-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .icon-btn svg { width: 18px; height: 18px; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .header h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
+    .filter-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .filter-btn svg { width: 14px; height: 14px; }
+    .stats { display: flex; gap: 16px; margin-bottom: 28px; }
+    .stat-card { flex: 1; padding: 20px; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }
+    .stat-card.dark { background: var(--dark-bg); color: var(--dark-text); border-color: transparent; }
+    .stat-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+    .stat-card.dark .stat-label { color: var(--dark-text-secondary); }
+    .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+    .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .stat-card.dark .stat-sub { color: var(--dark-text-secondary); }
+    .notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .note-card { background: var(--card); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); cursor: pointer; transition: all 0.25s ease; display: flex; flex-direction: column; min-height: 200px; position: relative; }
+    .note-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); border-color: transparent; }
+    .note-card.dark { background: var(--dark-bg); color: var(--dark-text); border-color: transparent; }
+    .note-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .note-tag { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 20px; background: var(--bg); color: var(--text-secondary); }
+    .note-card.dark .note-tag { background: rgba(255,255,255,0.1); color: var(--dark-text-secondary); }
+    .fav-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 2px; transition: color 0.2s; }
+    .fav-btn:hover, .fav-btn.active { color: #f59e0b; }
+    .fav-btn svg { width: 16px; height: 16px; }
+    .note-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+    .note-preview { font-size: 13px; line-height: 1.6; color: var(--text-secondary); flex: 1; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .note-card.dark .note-preview { color: var(--dark-text-secondary); }
+    .note-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .note-card.dark .note-footer { border-color: rgba(255,255,255,0.1); }
+    .note-date { font-size: 11px; color: var(--text-muted); }
+    .note-card.dark .note-date { color: var(--dark-text-secondary); }
+    .note-more { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 4px; transition: all 0.2s; }
+    .note-more:hover { background: var(--bg); color: var(--text-primary); }
+    .note-card.dark .note-more:hover { background: rgba(255,255,255,0.1); }
+    .note-more svg { width: 16px; height: 16px; }
+    .empty-state { text-align: center; padding: 80px 40px; }
+    .empty-state svg { width: 64px; height: 64px; color: var(--text-muted); margin-bottom: 16px; }
+    .empty-state h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; color: var(--text-secondary); }
+    @media (max-width: 1024px) { .notes-grid { grid-template-columns: repeat(2, 1fr); } .main { padding: 24px; } }
+    @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 20px; } .notes-grid { grid-template-columns: 1fr; } .stats { flex-direction: column; } .search-box { width: 100%; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      Notes
+    </div>
+    <nav class="nav">
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>All Notes</button>
+      <button class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Favorites</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Trash</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Tags</div>
+      <button class="nav-item"><span class="tag-dot" style="background:#3b82f6"></span>Work</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#10b981"></span>Personal</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#f59e0b"></span>Ideas</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#ef4444"></span>Urgent</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="new-note-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Note</button>
+      <div class="user-profile"><div class="avatar">AJ</div><div class="user-info"><span class="user-name">Ajay</span><span class="user-role">Pro Plan</span></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search favorites..." />
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+      </div>
+    </div>
+
+    <div class="header">
+      <h1>Favorites</h1>
+      <button class="filter-btn">This week <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Total Favorites</div><div class="stat-value">4</div><div class="stat-sub">Starred notes</div></div>
+      <div class="stat-card dark"><div class="stat-label">Added This Week</div><div class="stat-value">1</div><div class="stat-sub">Keep bookmarking!</div></div>
+    </div>
+
+    <div class="notes-grid">
+      <div class="note-card">
+        <div class="note-card-header"><span class="note-tag">Work</span><button class="fav-btn active"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button></div>
+        <div class="note-title">Meeting Notes</div>
+        <div class="note-preview">Discussed the new dashboard design with the team. Key decisions: use a card-based layout, implement dark mode support, and add real-time collaboration features.</div>
+        <div class="note-footer"><span class="note-date">Today, 2:30 PM</span><button class="note-more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div>
+      </div>
+      <div class="note-card">
+        <div class="note-card-header"><span class="note-tag">Personal</span><button class="fav-btn active"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button></div>
+        <div class="note-title">Reading List</div>
+        <div class="note-preview">Books to read: "Atomic Habits" by James Clear, "Deep Work" by Cal Newport, "The Design of Everyday Things" by Don Norman.</div>
+        <div class="note-footer"><span class="note-date">Sep 15, 2026</span><button class="note-more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div>
+      </div>
+      <div class="note-card dark">
+        <div class="note-card-header"><span class="note-tag">Urgent</span><button class="fav-btn active"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button></div>
+        <div class="note-title">Bug Fixes</div>
+        <div class="note-preview">Critical: Fix authentication timeout issue, resolve dark mode flickering on page load, patch memory leak in WebSocket connection handler.</div>
+        <div class="note-footer"><span class="note-date">Sep 13, 2026</span><button class="note-more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div>
+      </div>
+      <div class="note-card">
+        <div class="note-card-header"><span class="note-tag">Work</span><button class="fav-btn active"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button></div>
+        <div class="note-title">Design System</div>
+        <div class="note-preview">Component library: buttons, inputs, cards, modals, tooltips. Color palette: neutral grays with accent blue. Typography: Inter font family.</div>
+        <div class="note-footer"><span class="note-date">Sep 10, 2026</span><button class="note-more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); btn.classList.toggle('active'); const s = btn.querySelector('svg'); s.setAttribute('fill', btn.classList.contains('active') ? 'currentColor' : 'none'); });
+    });
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); item.classList.add('active'); });
+    });
+  </script>
+</body>
+</html>

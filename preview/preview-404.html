@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes App - 404</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f5f5f5; --card: #ffffff; --text-primary: #1a1a1a;
+      --text-secondary: #6b6b6b; --text-muted: #999999; --border: #e5e5e5;
+      --radius: 16px; --radius-sm: 12px; --radius-xs: 8px;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 220px; min-height: 100vh; background: var(--card); border-right: 1px solid var(--border); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 10; }
+    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 32px; height: 32px; background: var(--text-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 18px; height: 18px; }
+    .nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-xs); font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+    .nav-item.active { background: var(--text-primary); color: #fff; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .nav-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding: 0 14px; margin-bottom: 8px; }
+    .tag-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sidebar-bottom { margin-top: auto; }
+    .new-note-btn { width: 100%; padding: 12px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; margin-bottom: 20px; }
+    .new-note-btn:hover { opacity: 0.85; }
+    .new-note-btn svg { width: 18px; height: 18px; }
+    .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-xs); cursor: pointer; transition: background 0.2s; }
+    .user-profile:hover { background: var(--bg); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dark-bg, #1a1a1a); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--text-muted); }
+
+    .main { flex: 1; margin-left: 220px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .not-found { text-align: center; }
+    .not-found-code { font-size: 120px; font-weight: 700; letter-spacing: -4px; color: var(--border); line-height: 1; margin-bottom: 16px; }
+    .not-found-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+    .not-found-desc { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; max-width: 360px; }
+    .not-found-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .not-found-btn:hover { opacity: 0.85; }
+    .not-found-btn svg { width: 18px; height: 18px; }
+    .not-found-links { margin-top: 24px; display: flex; gap: 16px; justify-content: center; }
+    .not-found-link { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .not-found-link:hover { color: var(--text-primary); }
+
+    @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } .not-found-code { font-size: 80px; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      Notes
+    </div>
+    <nav class="nav">
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>All Notes</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Favorites</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Trash</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Tags</div>
+      <button class="nav-item"><span class="tag-dot" style="background:#3b82f6"></span>Work</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#10b981"></span>Personal</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#f59e0b"></span>Ideas</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#ef4444"></span>Urgent</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="new-note-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Note</button>
+      <div class="user-profile"><div class="avatar">AJ</div><div class="user-info"><span class="user-name">Ajay</span><span class="user-role">Pro Plan</span></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="not-found">
+      <div class="not-found-code">404</div>
+      <h2 class="not-found-title">Page not found</h2>
+      <p class="not-found-desc">Sorry, the page you're looking for doesn't exist or has been moved.</p>
+      <button class="not-found-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Go Home
+      </button>
+      <div class="not-found-links">
+        <a href="preview.html" class="not-found-link">Dashboard</a>
+        <a href="preview-favorites.html" class="not-found-link">Favorites</a>
+        <a href="preview-settings.html" class="not-found-link">Settings</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); item.classList.add('active'); });
+    });
+  </script>
+</body>
+</html>

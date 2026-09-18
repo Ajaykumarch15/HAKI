@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes App - Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f5f5f5; --card: #ffffff; --text-primary: #1a1a1a;
+      --text-secondary: #6b6b6b; --text-muted: #999999; --border: #e5e5e5;
+      --dark-bg: #1a1a1a; --dark-text: #ffffff; --dark-text-secondary: #a0a0a0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-hover: 0 8px 24px rgba(0,0,0,0.12);
+      --radius: 16px; --radius-sm: 12px; --radius-xs: 8px;
+      --red: #ef4444; --red-bg: rgba(239,68,68,0.08);
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; }
+    .sidebar { width: 220px; min-height: 100vh; background: var(--card); border-right: 1px solid var(--border); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 10; }
+    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 32px; height: 32px; background: var(--text-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 18px; height: 18px; }
+    .nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-xs); font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+    .nav-item.active { background: var(--text-primary); color: #fff; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .nav-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding: 0 14px; margin-bottom: 8px; }
+    .tag-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sidebar-bottom { margin-top: auto; }
+    .new-note-btn { width: 100%; padding: 12px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; margin-bottom: 20px; }
+    .new-note-btn:hover { opacity: 0.85; }
+    .new-note-btn svg { width: 18px; height: 18px; }
+    .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-xs); cursor: pointer; transition: background 0.2s; }
+    .user-profile:hover { background: var(--bg); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dark-bg); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--text-muted); }
+    .main { flex: 1; margin-left: 220px; padding: 32px 40px; max-width: 800px; }
+    .header { margin-bottom: 32px; }
+    .header h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
+    .settings-section { margin-bottom: 32px; }
+    .settings-section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 16px; }
+    .settings-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+    .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border); }
+    .settings-item:last-child { border-bottom: none; }
+    .settings-item-left { display: flex; flex-direction: column; gap: 2px; }
+    .settings-item-label { font-size: 14px; font-weight: 500; }
+    .settings-item-desc { font-size: 12px; color: var(--text-muted); }
+    .settings-item-right { display: flex; align-items: center; gap: 12px; }
+
+    /* Toggle Switch */
+    .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; }
+    .toggle input { display: none; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 12px; transition: all 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .toggle input:checked + .toggle-slider { background: var(--text-primary); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* Radio Buttons */
+    .radio-group { display: flex; gap: 8px; }
+    .radio-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+    .radio-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .radio-btn.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+
+    /* Buttons */
+    .settings-btn { padding: 10px 18px; border-radius: var(--radius-xs); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); background: var(--card); color: var(--text-secondary); }
+    .settings-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .settings-btn.primary { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+    .settings-btn.primary:hover { opacity: 0.85; }
+    .settings-btn.danger { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+    .settings-btn.danger:hover { background: var(--red); color: #fff; }
+
+    /* Shortcuts */
+    .shortcuts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 18px 24px; }
+    .shortcut-item { display: flex; align-items: center; justify-content: space-between; }
+    .shortcut-label { font-size: 13px; color: var(--text-secondary); }
+    .shortcut-keys { display: flex; gap: 4px; }
+    .kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; font-size: 11px; font-weight: 500; color: var(--text-secondary); font-family: inherit; }
+
+    .about-info { padding: 18px 24px; }
+    .about-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+    .about-label { font-size: 13px; color: var(--text-muted); }
+    .about-value { font-size: 13px; font-weight: 500; }
+    .about-link { color: var(--text-primary); text-decoration: none; font-weight: 500; }
+    .about-link:hover { text-decoration: underline; }
+
+    @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 20px; } .shortcuts-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      Notes
+    </div>
+    <nav class="nav">
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>All Notes</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Favorites</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Trash</button>
+      <button class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Tags</div>
+      <button class="nav-item"><span class="tag-dot" style="background:#3b82f6"></span>Work</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#10b981"></span>Personal</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#f59e0b"></span>Ideas</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#ef4444"></span>Urgent</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="new-note-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Note</button>
+      <div class="user-profile"><div class="avatar">AJ</div><div class="user-info"><span class="user-name">Ajay</span><span class="user-role">Pro Plan</span></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <h1>Settings</h1>
+    </div>
+
+    <!-- Appearance -->
+    <div class="settings-section">
+      <div class="settings-section-title">Appearance</div>
+      <div class="settings-card">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Theme</span>
+            <span class="settings-item-desc">Choose your preferred color scheme</span>
+          </div>
+          <div class="settings-item-right">
+            <div class="radio-group">
+              <button class="radio-btn active">Light</button>
+              <button class="radio-btn">Dark</button>
+              <button class="radio-btn">System</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Compact Mode</span>
+            <span class="settings-item-desc">Reduce spacing for a denser layout</span>
+          </div>
+          <div class="settings-item-right">
+            <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Show Note Preview</span>
+            <span class="settings-item-desc">Display content preview in note cards</span>
+          </div>
+          <div class="settings-item-right">
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="settings-section">
+      <div class="settings-section-title">Editor</div>
+      <div class="settings-card">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Auto-save</span>
+            <span class="settings-item-desc">Automatically save notes while editing</span>
+          </div>
+          <div class="settings-item-right">
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Spell Check</span>
+            <span class="settings-item-desc">Enable browser spell checking in editor</span>
+          </div>
+          <div class="settings-item-right">
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Default View</span>
+            <span class="settings-item-desc">Choose the default editor mode</span>
+          </div>
+          <div class="settings-item-right">
+            <div class="radio-group">
+              <button class="radio-btn active">Rich Text</button>
+              <button class="radio-btn">Markdown</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="settings-section">
+      <div class="settings-section-title">Data Management</div>
+      <div class="settings-card">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Export Notes</span>
+            <span class="settings-item-desc">Download all notes as a JSON file</span>
+          </div>
+          <div class="settings-item-right">
+            <button class="settings-btn primary">Export</button>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Import Notes</span>
+            <span class="settings-item-desc">Import notes from a JSON backup file</span>
+          </div>
+          <div class="settings-item-right">
+            <button class="settings-btn">Import</button>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <span class="settings-item-label">Clear All Notes</span>
+            <span class="settings-item-desc">Permanently delete all notes and tags</span>
+          </div>
+          <div class="settings-item-right">
+            <button class="settings-btn danger">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts -->
+    <div class="settings-section">
+      <div class="settings-section-title">Keyboard Shortcuts</div>
+      <div class="settings-card">
+        <div class="shortcuts-grid">
+          <div class="shortcut-item"><span class="shortcut-label">New note</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">N</span></div></div>
+          <div class="shortcut-item"><span class="shortcut-label">Search</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">K</span></div></div>
+          <div class="shortcut-item"><span class="shortcut-label">Bold</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">B</span></div></div>
+          <div class="shortcut-item"><span class="shortcut-label">Italic</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">I</span></div></div>
+          <div class="shortcut-item"><span class="shortcut-label">Underline</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">U</span></div></div>
+          <div class="shortcut-item"><span class="shortcut-label">Delete note</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">Del</span></div></div>
+          <div class="shortcut-item"><span class="shortcut-label">Pin note</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">P</span></div></div>
+          <div class="shortcut-item"><span class="shortcut-label">Toggle preview</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">E</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-section">
+      <div class="settings-section-title">About</div>
+      <div class="settings-card">
+        <div class="about-info">
+          <div class="about-row"><span class="about-label">Version</span><span class="about-value">1.0.0</span></div>
+          <div class="about-row"><span class="about-label">Built with</span><span class="about-value">React + TypeScript + Tailwind CSS</span></div>
+          <div class="about-row"><span class="about-label">Source Code</span><a href="#" class="about-link">GitHub</a></div>
+          <div class="about-row"><span class="about-label">Report Issue</span><a href="#" class="about-link">Open Issue</a></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('.radio-group').forEach(group => {
+      group.querySelectorAll('.radio-btn').forEach(btn => {
+        btn.addEventListener('click', () => { group.querySelectorAll('.radio-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); });
+      });
+    });
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); item.classList.add('active'); });
+    });
+  </script>
+</body>
+</html>

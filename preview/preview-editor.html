@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes App - Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f5f5f5; --card: #ffffff; --text-primary: #1a1a1a;
+      --text-secondary: #6b6b6b; --text-muted: #999999; --border: #e5e5e5;
+      --dark-bg: #1a1a1a; --dark-text: #ffffff; --dark-text-secondary: #a0a0a0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-hover: 0 8px 24px rgba(0,0,0,0.12);
+      --radius: 16px; --radius-sm: 12px; --radius-xs: 8px;
+      --red: #ef4444; --red-bg: rgba(239,68,68,0.08);
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+    /* Sidebar */
+    .sidebar { width: 220px; min-height: 100vh; background: var(--card); border-right: 1px solid var(--border); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 10; }
+    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 32px; height: 32px; background: var(--text-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 18px; height: 18px; }
+    .nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-xs); font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+    .nav-item.active { background: var(--text-primary); color: #fff; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .nav-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding: 0 14px; margin-bottom: 8px; }
+    .tag-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sidebar-bottom { margin-top: auto; }
+    .new-note-btn { width: 100%; padding: 12px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; margin-bottom: 20px; }
+    .new-note-btn:hover { opacity: 0.85; }
+    .new-note-btn svg { width: 18px; height: 18px; }
+    .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-xs); cursor: pointer; transition: background 0.2s; }
+    .user-profile:hover { background: var(--bg); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dark-bg); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--text-muted); }
+
+    /* Split Layout */
+    .split-layout { flex: 1; margin-left: 220px; display: flex; height: 100vh; }
+
+    /* Note List Panel */
+    .note-list-panel { width: 340px; border-right: 1px solid var(--border); background: var(--card); display: flex; flex-direction: column; flex-shrink: 0; }
+    .note-list-header { padding: 20px 20px 0; }
+    .note-list-search { display: flex; align-items: center; gap: 10px; background: var(--bg); border-radius: var(--radius-xs); padding: 10px 14px; }
+    .note-list-search svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+    .note-list-search input { border: none; outline: none; font-size: 13px; font-family: inherit; color: var(--text-primary); width: 100%; background: transparent; }
+    .note-list-search input::placeholder { color: var(--text-muted); }
+    .note-list-items { flex: 1; overflow-y: auto; padding: 12px; }
+    .note-list-item { padding: 14px; border-radius: var(--radius-xs); cursor: pointer; transition: all 0.15s; margin-bottom: 4px; }
+    .note-list-item:hover { background: var(--bg); }
+    .note-list-item.active { background: var(--text-primary); color: #fff; }
+    .note-list-item-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
+    .note-list-item-preview { font-size: 12px; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .note-list-item.active .note-list-item-preview { color: rgba(255,255,255,0.7); }
+    .note-list-item-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .note-list-item-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; padding: 2px 6px; border-radius: 4px; background: var(--bg); color: var(--text-muted); }
+    .note-list-item.active .note-list-item-tag { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+    .note-list-item-date { font-size: 11px; color: var(--text-muted); }
+    .note-list-item.active .note-list-item-date { color: rgba(255,255,255,0.6); }
+
+    /* Editor Panel */
+    .editor-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+    .editor-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border); background: var(--card); }
+    .editor-topbar-left { display: flex; align-items: center; gap: 12px; }
+    .editor-back-btn { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-xs); border: 1px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s; color: var(--text-secondary); }
+    .editor-back-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .editor-back-btn svg { width: 18px; height: 18px; }
+    .editor-topbar-title { font-size: 13px; color: var(--text-muted); }
+    .editor-topbar-right { display: flex; align-items: center; gap: 8px; }
+    .editor-action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: var(--radius-xs); border: 1px solid var(--border); background: var(--card); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+    .editor-action-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .editor-action-btn svg { width: 16px; height: 16px; }
+    .editor-action-btn.danger { border-color: var(--red); color: var(--red); }
+    .editor-action-btn.danger:hover { background: var(--red); color: #fff; }
+    .pin-btn.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+
+    /* Editor Content */
+    .editor-content { flex: 1; overflow-y: auto; padding: 40px; }
+    .editor-inner { max-width: 700px; margin: 0 auto; }
+    .editor-title { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; border: none; outline: none; width: 100%; background: transparent; color: var(--text-primary); margin-bottom: 12px; font-family: inherit; }
+    .editor-title::placeholder { color: var(--text-muted); }
+    .editor-tags { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .editor-tag { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; background: var(--card); border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .editor-tag-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .editor-tag-remove { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: none; background: none; cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
+    .editor-tag-remove:hover { background: var(--bg); color: var(--red); }
+    .editor-tag-remove svg { width: 10px; height: 10px; }
+    .add-tag-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; border: 1px dashed var(--border); background: transparent; font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+    .add-tag-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .add-tag-btn svg { width: 12px; height: 12px; }
+
+    /* Toolbar */
+    .editor-toolbar { display: flex; align-items: center; gap: 2px; padding: 8px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xs); margin-bottom: 24px; flex-wrap: wrap; }
+    .toolbar-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: none; background: none; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; font-size: 14px; font-weight: 600; font-family: inherit; }
+    .toolbar-btn:hover { background: var(--bg); color: var(--text-primary); }
+    .toolbar-btn.active { background: var(--text-primary); color: #fff; }
+    .toolbar-btn svg { width: 16px; height: 16px; }
+    .toolbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+    /* Editor Body */
+    .editor-body { min-height: 300px; font-size: 15px; line-height: 1.7; color: var(--text-primary); outline: none; }
+    .editor-body p { margin-bottom: 12px; }
+    .editor-body h1 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+    .editor-body h2 { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+    .editor-body ul, .editor-body ol { padding-left: 24px; margin-bottom: 12px; }
+    .editor-body li { margin-bottom: 4px; }
+    .editor-body code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; padding: 2px 6px; background: var(--bg); border-radius: 4px; }
+    .editor-body blockquote { border-left: 3px solid var(--border); padding-left: 16px; color: var(--text-secondary); margin-bottom: 12px; }
+    .editor-body .placeholder { color: var(--text-muted); }
+
+    /* Editor Footer */
+    .editor-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; border-top: 1px solid var(--border); background: var(--card); font-size: 12px; color: var(--text-muted); }
+    .editor-footer-left { display: flex; align-items: center; gap: 12px; }
+    .auto-save { display: flex; align-items: center; gap: 6px; }
+    .auto-save-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+
+    @media (max-width: 1024px) { .note-list-panel { width: 280px; } .editor-content { padding: 24px; } }
+    @media (max-width: 768px) { .sidebar { display: none; } .split-layout { margin-left: 0; } .note-list-panel { display: none; } .editor-back-btn { display: flex; } .editor-topbar { padding: 12px 16px; } .editor-content { padding: 20px 16px; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      Notes
+    </div>
+    <nav class="nav">
+      <button class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>All Notes</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Favorites</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Trash</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Tags</div>
+      <button class="nav-item"><span class="tag-dot" style="background:#3b82f6"></span>Work</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#10b981"></span>Personal</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#f59e0b"></span>Ideas</button>
+      <button class="nav-item"><span class="tag-dot" style="background:#ef4444"></span>Urgent</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="new-note-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Note</button>
+      <div class="user-profile"><div class="avatar">AJ</div><div class="user-info"><span class="user-name">Ajay</span><span class="user-role">Pro Plan</span></div></div>
+    </div>
+  </aside>
+
+  <div class="split-layout">
+    <!-- Note List -->
+    <div class="note-list-panel">
+      <div class="note-list-header">
+        <div class="note-list-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search notes..." />
+        </div>
+      </div>
+      <div class="note-list-items">
+        <div class="note-list-item active">
+          <div class="note-list-item-title">Meeting Notes</div>
+          <div class="note-list-item-preview">Discussed the new dashboard design with the team...</div>
+          <div class="note-list-item-meta"><span class="note-list-item-tag">Work</span><span class="note-list-item-date">Today</span></div>
+        </div>
+        <div class="note-list-item">
+          <div class="note-list-item-title">Product Roadmap</div>
+          <div class="note-list-item-preview">Q3 priorities: Launch the mobile app, integrate AI...</div>
+          <div class="note-list-item-meta"><span class="note-list-item-tag">Ideas</span><span class="note-list-item-date">Yesterday</span></div>
+        </div>
+        <div class="note-list-item">
+          <div class="note-list-item-title">Reading List</div>
+          <div class="note-list-item-preview">Books to read: Atomic Habits, Deep Work...</div>
+          <div class="note-list-item-meta"><span class="note-list-item-tag">Personal</span><span class="note-list-item-date">Sep 15</span></div>
+        </div>
+        <div class="note-list-item">
+          <div class="note-list-item-title">API Documentation</div>
+          <div class="note-list-item-preview">REST endpoints: /api/notes (GET, POST)...</div>
+          <div class="note-list-item-meta"><span class="note-list-item-tag">Work</span><span class="note-list-item-date">Sep 14</span></div>
+        </div>
+        <div class="note-list-item">
+          <div class="note-list-item-title">Bug Fixes</div>
+          <div class="note-list-item-preview">Critical: Fix authentication timeout issue...</div>
+          <div class="note-list-item-meta"><span class="note-list-item-tag">Urgent</span><span class="note-list-item-date">Sep 13</span></div>
+        </div>
+        <div class="note-list-item">
+          <div class="note-list-item-title">Workout Plan</div>
+          <div class="note-list-item-preview">Mon: Chest & Triceps, Tue: Back & Biceps...</div>
+          <div class="note-list-item-meta"><span class="note-list-item-tag">Personal</span><span class="note-list-item-date">Sep 12</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor-panel">
+      <div class="editor-topbar">
+        <div class="editor-topbar-left">
+          <button class="editor-back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <span class="editor-topbar-title">Editing note</span>
+        </div>
+        <div class="editor-topbar-right">
+          <button class="editor-action-btn pin-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>Pin</button>
+          <button class="editor-action-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>
+          <button class="editor-action-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
+        </div>
+      </div>
+
+      <div class="editor-content">
+        <div class="editor-inner">
+          <input class="editor-title" type="text" value="Meeting Notes" placeholder="Note title..." />
+          <div class="editor-tags">
+            <span class="editor-tag"><span class="editor-tag-dot" style="background:#3b82f6"></span>Work<button class="editor-tag-remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></span>
+            <button class="add-tag-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add tag</button>
+          </div>
+          <div class="editor-toolbar">
+            <button class="toolbar-btn active"><b>B</b></button>
+            <button class="toolbar-btn"><i>I</i></button>
+            <button class="toolbar-btn"><s>S</s></button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/></svg></button>
+            <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 12h4"/><path d="M17 18h4"/></svg></button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+            <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><path d="M3 6h1v4"/><path d="M3 10h2"/><path d="M3 14h2v4"/></svg></button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
+            <button class="toolbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+          </div>
+          <div class="editor-body" contenteditable="true">
+            <p>Discussed the new dashboard design with the team. Key decisions were made regarding the overall architecture and visual direction of the project.</p>
+            <h2>Key Decisions</h2>
+            <ul>
+              <li>Use a card-based layout for the main content area</li>
+              <li>Implement dark mode support from day one</li>
+              <li>Add real-time collaboration features using WebSockets</li>
+              <li>Follow the existing design system for consistency</li>
+            </ul>
+            <h2>Action Items</h2>
+            <ul>
+              <li>Create high-fidelity mockups by Friday</li>
+              <li>Set up the WebSocket infrastructure</li>
+              <li>Write technical specification document</li>
+              <li>Schedule follow-up meeting for next Tuesday</li>
+            </ul>
+            <blockquote>The team agreed on a phased rollout approach, starting with the core dashboard and adding collaboration features in sprint 25.</blockquote>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <div class="editor-footer-left">
+          <span class="auto-save"><span class="auto-save-dot"></span>Auto-saved</span>
+          <span>284 words</span>
+          <span>1,432 characters</span>
+        </div>
+        <span>Today, 2:30 PM</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.note-list-item').forEach(item => {
+      item.addEventListener('click', () => { document.querySelectorAll('.note-list-item').forEach(i => i.classList.remove('active')); item.classList.add('active'); });
+    });
+    document.querySelectorAll('.toolbar-btn').forEach(btn => {
+      btn.addEventListener('click', () => { btn.classList.toggle('active'); });
+    });
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); item.classList.add('active'); });
+    });
+  </script>
+</body>
+</html>
